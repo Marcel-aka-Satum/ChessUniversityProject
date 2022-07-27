@@ -17,11 +17,15 @@ class SchaakStuk {
 public:
 
     SchaakStuk(zw kleur): kleur(kleur) {}
+
     int rij;
+
     int kolom;
+
     vector<pair<int,int>> danger_posities; // positions that SchaakStuk can kill
-    bool check_danger();
+
     virtual vector<pair<int,int>> geldige_zetten(Game& g);
+
     virtual Piece piece() const=0;      // Verander deze functie niet!
                                         // Deze functie wordt gebruikt door
                                         // setItem(x,y,SchaakStuk*) van

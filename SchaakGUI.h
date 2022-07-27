@@ -6,21 +6,21 @@
 #define SCHAKEN_SCHAAKGUI_H
 
 #include "guicode/ChessWindow.h"
-#include "SchaakStuk.h"
 #include <QMessageBox>
 #include <QAction>
 #include "vector"
+#include "SchaakStuk.h"
 
 class SchaakGUI:public ChessWindow {
 public:
     SchaakGUI();
 
     void update();
-    void updateWhite(vector<pair<int,int>> &whiteKillPositions2); //Gaat in vector whiteKillPositions alle coordinaten steken die wit kan killen
-    void updateBlack(vector<pair<int,int>> &blackKillPositions2); //Gaat in vector blackKillPositions alle coordinaten steken die black kan killen
+    void updateWhite(vector<pair<int,int>> &whiteKillPositions2); //Gaat in vector whiteKillPositions2 alle coordinaten steken die wit kan killen
+    void updateBlack(vector<pair<int,int>> &blackKillPositions2); //Gaat in vector blackKillPositions2 alle coordinaten steken die black kan killen
     void geldigForWhite();
     void geldigForBlack();
-    void printGeldigWhite(vector<pair<int,int>> killPositions);
+    void printGeldig(vector<pair<int,int>> killPositions);
 
 private:
     Game g;

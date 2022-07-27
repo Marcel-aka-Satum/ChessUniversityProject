@@ -17,8 +17,6 @@ bool secondClick = false; // een bool om te kijken of wij user second click doet
 int r2, k2; // bevat rij en kolom van de vorige schaakstuk indien er een nieuwe gekozen word
 vector<pair<int,int>> v; // bevat de geldige zetten van schaakstuk s
 SchaakStuk* s; // bevat de schaakstuk
-vector<pair<int,int>> blackKillPositions; // vector die bevat alle posities die white kan killen OP HET MOMENT (gebruikt in functei updateBlack())
-vector<pair<int,int>> whiteKillPositions; // vector die bevat alle posities die white kan OP HET MOMENT killen (gebruikt in functie updateWhite())
 
 
 // Deze functie wordt opgeroepen telkens er op het schaakbord
@@ -69,10 +67,10 @@ void SchaakGUI::clicked(int r, int k) {
             update();
             // set threat
             if(SchaakGUI::displayThreats()){
-                for(auto v : whiteKillPositions){
+                for(auto v : g.getWhiteKillPositions()){
                     setPieceThreat(v.first, v.second, true);
                 }
-                for(auto l : blackKillPositions){
+                for(auto l : g.getBlackKillPositions()){
                     setPieceThreat(l.first, l.second, true);
                 }
             }
@@ -96,15 +94,22 @@ void SchaakGUI::clicked(int r, int k) {
             g.move(s,r,k);
             removeAllMarking();
             update();
-            updateWhite(whiteKillPositions);
-            updateBlack(blackKillPositions);
-            printGeldigWhite(whiteKillPositions);
+//            g.update_geldige_zetten();
+            updateWhite(g.getWhiteKillPositions());
+            updateBlack(g.getBlackKillPositions());
+            //check
+            if(g.schaak(wit, g.getBlackKillPositions())){
+                message("Schaak wit!");
+            } else if(g.schaak(zwart, g.getWhiteKillPositions())){
+                message("Schaak zwart!");
+            }
+
             // set threat
             if(SchaakGUI::displayThreats()){
-                for(auto v : whiteKillPositions){
+                for(auto v : g.getWhiteKillPositions()){
                     setPieceThreat(v.first, v.second, true);
                 }
-                for(auto l : blackKillPositions){
+                for(auto l : g.getBlackKillPositions()){
                     setPieceThreat(l.first, l.second, true);
                 }
             }
@@ -194,7 +199,11 @@ void SchaakGUI::update() {
     }
 }
 
-
+/*
+ * void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2);
+ * Loop door de schaakboord en kijk de danger_posities van elke witte schaakstuk vervolgens voeg deze toe in whiteKillPositions vector
+ * die gebruikt wordt om te kijken waar witte speler zwarte speler kan killen
+ * * */
 void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
     geldigForWhite();
     whiteKillPositions2.clear();
@@ -205,7 +214,16 @@ void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
             if(g.schaakboord[i][j] != nullptr && g.schaakboord[i][j]->getKleur() == wit){
                 if(g.schaakboord[i][j]->danger_posities.size() > 0){
                     for(auto b : g.schaakboord[i][j]->danger_posities){
-                        whiteKillPositions2.push_back(make_pair(b.first, b.second));
+                        bool found = false; // check if there is already same pair
+                        for(auto h : whiteKillPositions2){
+                            if(h.first == b.first && h.second == b.second){
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found){
+                            whiteKillPositions2.push_back(make_pair(b.first, b.second));
+                        }
                     }
                 }
             }
@@ -224,6 +242,10 @@ void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
     }
 }
 
+/*
+ * void SchaakGUI::updateBlack(vector<pair<int,int>> &blackKillPositions2);
+ * Zelfde als functie hierboven maar voor zwarte speler
+ * * */
 void SchaakGUI::updateBlack(vector<pair<int,int>> &blackKillPositions2){
     geldigForBlack();
     blackKillPositions2.clear();
@@ -234,7 +256,16 @@ void SchaakGUI::updateBlack(vector<pair<int,int>> &blackKillPositions2){
             if(g.schaakboord[i][j] != nullptr){
                 if(g.schaakboord[i][j]->getKleur() == zwart){
                     for(auto b : g.schaakboord[i][j]->danger_posities){
-                        blackKillPositions2.push_back(make_pair(b.first, b.second));
+                        bool found = false; // check if there is already same pair
+                        for(auto h : blackKillPositions2){
+                            if(h.first == b.first && h.second == b.second){
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found){
+                            blackKillPositions2.push_back(make_pair(b.first, b.second));
+                        }
                     }
                 }
             }
@@ -279,15 +310,15 @@ void SchaakGUI::geldigForBlack(){
     }
 }
 
-void SchaakGUI::printGeldigWhite(vector<pair<int, int>> killPositions) {
+void SchaakGUI::printGeldig(vector<pair<int, int>> killPositions) {
 
     if(killPositions.size() > 0){
-        cout << "POSITIES DIE WHITE KAN KILLEN: " << endl;
+        cout << "POSITIES DIE BLACK KAN KILLEN: " << endl;
         for(auto i :killPositions){
             cout << i.first << ", " << i.second << endl;
         }
     } else{
-        cout << "White kan niemand killen " << endl;
+        cout << "BLACK kan niemand killen " << endl;
     }
 }
 

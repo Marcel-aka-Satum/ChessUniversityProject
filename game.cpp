@@ -6,6 +6,7 @@
 #include "game.h"
 #include "SchaakGUI.h"
 #include "iostream"
+#include "guicode/message.h"
 Game::Game() {}
 
 Game::~Game() {}
@@ -62,8 +63,6 @@ void Game::setStartBord() {
            }
         }
     }
-    schaak(wit);
-
 }
 
 // Verplaats stuk s naar positie (r,k)
@@ -71,11 +70,11 @@ void Game::setStartBord() {
 // en verandert er niets aan het schaakbord.
 // Anders wordt de move uitgevoerd en wordt true teruggegeven
 bool Game::move(SchaakStuk* s, int r, int k) {
-
     vector<pair<int,int>> v= s->geldige_zetten(*this);
     int rij = s->rij;
     int kolom = s->kolom;
     bool canMove = false;
+
     for(auto i : v){
         if(i.first == r && i.second == k){
             canMove = true;
@@ -86,7 +85,13 @@ bool Game::move(SchaakStuk* s, int r, int k) {
         setPiece(r,k,s);
         schaakboord[r][k]->rij = r;
         schaakboord[r][k]->kolom = k;
-        schaak(s->getKleur());
+        if(s->piece().type() == 0 && s->getKleur() == wit){
+            rijWhiteKing = r;
+            kolomWhiteKing = k;
+        } else if(s->piece().type() == 0 && s->getKleur() == zwart){
+            rijBlackKing = r;
+            kolomBlackKing = k;
+        }
         return true;
     } else{
         return false;
@@ -94,14 +99,16 @@ bool Game::move(SchaakStuk* s, int r, int k) {
 }
 
 // Geeft true als kleur schaak staat
-bool Game::schaak(zw kleur) {
+bool Game::schaak(zw kleur, vector<pair<int,int>> &killPositions) {
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
             if(schaakboord[i][j] != nullptr){
                 if(schaakboord[i][j]->piece().type() == 0 && schaakboord[i][j]->getKleur() == kleur){ // type 0 == King
-                    if(schaakboord[i][j]->check_danger()){
-                        cout << "KONING IS IN DANGER!!!" << endl;
-                        return true;
+                    //kijk of enemy de king kan killen
+                    for(auto h : killPositions){
+                        if(h.first == i && h.second == j){
+                            return true;
+                        }
                     }
                 }
             }
@@ -137,6 +144,83 @@ void Game::setPiece(int r, int k, SchaakStuk* s)
 {
     // Hier komt jouw code om een stuk neer te zetten op het bord
     schaakboord[r][k] = s;
+    schaakboord[r][k]->rij = r;
+    schaakboord[r][k]->kolom = k;
+}
+
+vector<pair<int, int>> &Game::getBlackKillPositions(){
+    return blackKillPositions;
+}
+
+vector<pair<int, int>> &Game::getWhiteKillPositions(){
+    return whiteKillPositions;
+}
+
+bool Game::schaak_danger(int r, int k){
+    if(schaakboord[r][k] == nullptr){
+        return false;
+    }
+    SchaakStuk* s = schaakboord[r][k];
+    if(s->getKleur() == zwart){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                if(schaakboord[i][j] != nullptr && schaakboord[i][j]->getKleur() == wit){
+                    for(auto i : schaakboord[i][j]->danger_posities){
+                        if(i.first == r && i.second == k){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    } else if(s->getKleur() == wit){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                if(schaakboord[i][j] != nullptr && schaakboord[i][j]->getKleur() == zwart){
+                    for(auto i : schaakboord[i][j]->danger_posities){
+                        if(i.first == r && i.second == k){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void Game::update_geldige_zetten() {
+    for(int i = 0; i < 8; i++){
+        for(int j = 0; j < 8; j++){
+            if(schaakboord[i][j] != nullptr){
+                int position = 0;
+                bool remove = false;
+                SchaakStuk* s = schaakboord[i][j];
+                if(schaakboord[i][j]->geldige_zetten(*this).size() > 0){
+                    for(auto h : schaakboord[i][j]->geldige_zetten(*this)){
+                        move(schaakboord[i][j], h.first, h.second);
+                        if(schaakboord[h.first][h.second]->getKleur() == zwart){
+                            if(schaak_danger(rijBlackKing, kolomBlackKing)){
+                                remove = true;
+                            }
+                        } else if(schaakboord[h.first][h.second]->getKleur() == wit){
+                            if(schaak_danger(rijWhiteKing, kolomWhiteKing)){
+                                remove = true;
+                            }
+                        }
+                        //remove zet in geldige zetten indien de koning nogsteeds in danger is
+                        if(remove){
+                            schaakboord[i][j]->geldige_zetten(*this).erase(schaakboord[i][j]->geldige_zetten(*this).begin() + position);
+                            remove = false;
+                        }
+                        schaakboord[h.first][h.second] = nullptr;
+                        setPiece(i,j, s);
+                        position++;
+                    }
+                }
+            }
+        }
+    }
 }
 
 
