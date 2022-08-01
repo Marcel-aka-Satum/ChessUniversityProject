@@ -12,10 +12,19 @@ vector<pair<int,int>> SchaakStuk::geldige_zetten(Game& g){
     return zetten;
 }
 
+vector<pair<int, int>> &SchaakStuk::getEigenGeldigeZetten() {
+    return eigen_geldige_zetten;
+}
+
+void SchaakStuk::setEigenGeldigeZetten(vector<pair<int, int>> eigenGeldigeZetten) {
+    eigen_geldige_zetten = eigenGeldigeZetten;
+}
+
 vector<pair<int,int>> Pion::geldige_zetten(Game& g){
     vector<pair<int,int>> zetten;
     int rij = this->rij;
     int kolom = this->kolom;
+    danger_posities.clear();
 
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){ // check black
         if(g.schaakboord[rij+1][kolom+1] != nullptr && g.schaakboord[rij+1][kolom+1]->getKleur() == wit && g.schaakboord[rij][kolom]->kolom < 7 && rij+1 >= 0 && rij+1 <= 7) {
@@ -60,6 +69,7 @@ vector<pair<int,int>> Toren::geldige_zetten(Game& g){
     vector<pair<int,int>> zetten;
     int rij = this->rij;
     int kolom = this->kolom;
+    danger_posities.clear();
 
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){
         //under for black
@@ -191,6 +201,7 @@ vector<pair<int,int>> Paard::geldige_zetten(Game& g){
     vector<pair<int,int>> zetten;
     int rij = this->rij;
     int kolom = this->kolom;
+    danger_posities.clear();
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){
         // boven rechts
         if(rij-2 >= 0){
@@ -362,7 +373,6 @@ vector<pair<int,int>> Paard::geldige_zetten(Game& g){
             }
         }
     }
-
     return zetten;
 }
 
@@ -370,6 +380,7 @@ vector<pair<int,int>> Loper::geldige_zetten(Game& g){
     vector<pair<int,int>> zetten;
     int rij = this->rij;
     int kolom = this->kolom;
+    danger_posities.clear();
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){
         //schijn links boven
         for(int i = 1; i < 8; i++){
@@ -533,7 +544,6 @@ vector<pair<int,int>> Loper::geldige_zetten(Game& g){
             }
         }
     }
-
     return zetten;
 }
 
@@ -541,6 +551,7 @@ vector<pair<int,int>> Koning::geldige_zetten(Game& g){
     vector<pair<int,int>> zetten;
     int rij = this->rij;
     int kolom = this->kolom;
+    danger_posities.clear();
 
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){ // BLACK KING
         //up
@@ -598,7 +609,7 @@ vector<pair<int,int>> Koning::geldige_zetten(Game& g){
         //down mid
         if(rij+1 < 8){
             if(g.schaakboord[rij+1][kolom] == nullptr){
-                zetten.push_back(make_pair(rij-1,kolom));
+                zetten.push_back(make_pair(rij+1,kolom));
             } else if(g.schaakboord[rij+1][kolom] != nullptr && g.schaakboord[rij+1][kolom]->getKleur() == wit){
                 zetten.push_back(make_pair(rij+1, kolom));
                 danger_posities.push_back(make_pair(rij+1, kolom)); //DEZE POSITIE KAN GEKILLED WORDEN
@@ -715,6 +726,8 @@ vector<pair<int,int>> Koningin::geldige_zetten(Game& g){
     vector<pair<int,int>> zetten;
     int rij = this->rij;
     int kolom = this->kolom;
+    danger_posities.clear();
+
     //LOPER
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){
         //schijn links boven

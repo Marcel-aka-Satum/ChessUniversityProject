@@ -13,15 +13,16 @@ class Game {
 
 public:
     Game();
+
     ~Game();
 
     bool move(SchaakStuk* s,int r, int k); // Verplaats stuk s naar rij r en kolom k
     //kijkt of koning met kleur in schaak staat
     bool schaak(zw kleur, vector<pair<int,int>> &killPositions);
 
-    bool schaakmat(zw kleur);
+    bool schaakmat(zw kleur, vector<pair<int,int>> &killPositions);
 
-    bool pat(zw kleur);
+    bool pat(zw kleur, vector<pair<int,int>> &killPositions);
 
     void setStartBord();
 
@@ -37,21 +38,21 @@ public:
     //kijkt of een bepaalde schaakstuk op positie r, k in schaak staat
     bool schaak_danger(int r, int k);
 
+    // sla info op van elke koning zodat gij niet elke keer moet door de schaakboord loopen om die te vinden
     int rijWhiteKing = 0;
-
     int kolomWhiteKing = 4;
-
     int rijBlackKing = 7;
-
     int kolomBlackKing = 4;
+
     //verwijder geldige zetten van schaakstukken wnr koning in schaak staat
     void update_geldige_zetten();
 
+
 private:
     // Hier zet jij jouw datastructuur neer om het bord te bewaren ...
-    vector<pair<int,int>> blackKillPositions; // vector die bevat alle posities die white kan killen OP HET MOMENT (gebruikt in functei updateBlack())
+    vector<pair<int,int>> blackKillPositions; // vector die bevat alle posities die white kan killen OP HET MOMENT (geupdate in functie updateBlack())
 
-    vector<pair<int,int>> whiteKillPositions; // vector die bevat alle posities die white kan OP HET MOMENT killen (gebruikt in functie updateWhite())
+    vector<pair<int,int>> whiteKillPositions; // vector die bevat alle posities die white kan OP HET MOMENT killen (geupdate in functie updateWhite())
 
 };
 

@@ -16,14 +16,19 @@ public:
     SchaakGUI();
 
     void update();
-    void updateWhite(vector<pair<int,int>> &whiteKillPositions2); //Gaat in vector whiteKillPositions2 alle coordinaten steken die wit kan killen
-    void updateBlack(vector<pair<int,int>> &blackKillPositions2); //Gaat in vector blackKillPositions2 alle coordinaten steken die black kan killen
-    void geldigForWhite();
-    void geldigForBlack();
-    void printGeldig(vector<pair<int,int>> killPositions);
+    void updateWhite(vector<pair<int,int>> &whiteKillPositions2); //Gaat in vector whiteKillPositions2 alle coordinaten steken die wit kan killen (steekt geen coordinaten wnr er na een kill schaakmat is)
+    void updateBlack(vector<pair<int,int>> &blackKillPositions2); //Gaat in vector blackKillPositions2 alle coordinaten steken die black kan killen (steekt geen coordinaten wnr er na een kill schaakmat is)
+    void color_red(SchaakStuk* s); // click on a Schaakstuk and then make a move for every legal move for this Schaakstuk and if the move is dangerous (can be killed) color the square red, reset everything to it's primary state
 
 private:
     Game g;
+
+
+private:
+    //bool vars used for displaymoves (updated after visualizationChange!)
+    bool dMoves;
+    bool dThreats;
+    bool dKills;
 
     void clicked(int x, int y) override;
     void newGame() override;

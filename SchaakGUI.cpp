@@ -18,7 +18,6 @@ int r2, k2; // bevat rij en kolom van de vorige schaakstuk indien er een nieuwe 
 vector<pair<int,int>> v; // bevat de geldige zetten van schaakstuk s
 SchaakStuk* s; // bevat de schaakstuk
 
-
 // Deze functie wordt opgeroepen telkens er op het schaakbord
 // geklikt wordt. x,y geeft de positie aan waar er geklikt
 // werd; r is de 0-based rij, k de 0-based kolom
@@ -26,17 +25,24 @@ void SchaakGUI::clicked(int r, int k) {
     if (!secondClick){
         if(g.schaakboord[r][k] != nullptr){
             s = g.getPiece(r,k);
-            v=s->geldige_zetten(g);
+            v= s->getEigenGeldigeZetten();
         }
     }
-    if(beginWit == 0 && secondClick == false){ // eerste begint wit dus select wit
+    //FIRST CLICK
+    if(beginWit == 0 && !secondClick && s != nullptr){ // eerste begint wit dus select wit
         if(s->getKleur() == wit){
-            if(SchaakGUI::displayMoves()){
-                setTileSelect(r,k, true);
-                for(auto i : v){ // geef dan alle geldige posities waarnaar dit stuk verplaatst kan worden
-                    setTileFocus(i.first,i.second, true);
+            removeAllMarking();
+            //setTileSelect + setTileFocus
+            if(g.schaakboord[r][k] != nullptr){
+                if(dMoves){
+                    setTileSelect(r,k, true);
+                    for(auto i : v){ // geef dan alle geldige posities waarnaar dit stuk verplaatst kan worden
+                        setTileFocus(i.first,i.second, true);
+                    }
                 }
             }
+            //color_red(s) = setTileThreat
+            color_red(s);
             r2 = r;
             k2 = k;
             beginWit++;
@@ -44,15 +50,20 @@ void SchaakGUI::clicked(int r, int k) {
             update();
             return;
         }
-    } else if(beginWit == 1 && !secondClick) {// na wit moet zwart
+    } else if(beginWit == 1 && !secondClick && s != nullptr) { // na wit moet zwart
         if(s->getKleur() == zwart){
-            if(SchaakGUI::displayMoves()){
-                setTileSelect(r,k, true);
-                for(auto i : v){ // geef dan alle geldige posities waarnaar dit stuk verplaatst kan worden
-                    setTileFocus(i.first,i.second, true);
+            removeAllMarking();
+            //setTileSelect + setTileFocus
+            if(g.schaakboord[r][k] != nullptr){
+                if(dMoves){
+                    setTileSelect(r,k, true);
+                    for(auto i : v){ // geef dan alle geldige posities waarnaar dit stuk verplaatst kan worden
+                        setTileFocus(i.first,i.second, true);
+                    }
                 }
             }
-
+            //color_red(s) = setTileThreat
+            color_red(s);
             r2 = r;
             k2 = k;
             beginWit--;
@@ -61,19 +72,34 @@ void SchaakGUI::clicked(int r, int k) {
             return;
         }
     }
-    if(secondClick){ // second click
-        if(r == r2 && k == k2){ // unselect
+    if(secondClick){ // SECOND CLICK
+        // unselect Schaakstuk
+        if(r == r2 && k == k2){
             removeAllMarking();
-            update();
-            // set threat
-            if(SchaakGUI::displayThreats()){
-                for(auto v : g.getWhiteKillPositions()){
-                    setPieceThreat(v.first, v.second, true);
-                }
-                for(auto l : g.getBlackKillPositions()){
-                    setPieceThreat(l.first, l.second, true);
+            //setPieceThreat
+            if(dKills){
+                if(s->getKleur() == zwart){
+                    for(auto move : g.getBlackKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                } else if(s->getKleur() == wit){
+                    for(auto move : g.getWhiteKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
                 }
             }
+            if(dThreats){
+                if(s->getKleur() == wit){
+                    for(auto move : g.getBlackKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                } else if(s->getKleur() == zwart){
+                    for(auto move : g.getWhiteKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                }
+            }
+            s = nullptr;
             if(beginWit == 1){
                 beginWit = 0;
                 secondClick = false;
@@ -83,6 +109,7 @@ void SchaakGUI::clicked(int r, int k) {
             }
             return;
         }
+        // look if it's a valid move
         bool found = false;
         for(auto i : v){
             if(i.first == r && i.second == k){
@@ -90,28 +117,52 @@ void SchaakGUI::clicked(int r, int k) {
                 break;
             }
         }
-        if(found){
+        if(found){ // beweging gevonden
             g.move(s,r,k);
             removeAllMarking();
             update();
-//            g.update_geldige_zetten();
             updateWhite(g.getWhiteKillPositions());
             updateBlack(g.getBlackKillPositions());
+            //setPieceThreat
+            if(dKills){
+                if(s->getKleur() == zwart){
+                    for(auto move : g.getBlackKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                } else if(s->getKleur() == wit){
+                    for(auto move : g.getWhiteKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                }
+            }
+            if(dThreats){
+                if(s->getKleur() == wit){
+                    for(auto move : g.getBlackKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                } else if(s->getKleur() == zwart){
+                    for(auto move : g.getWhiteKillPositions()){
+                        setPieceThreat(move.first, move.second, true);
+                    }
+                }
+            }
+            //check mate
+            if(g.schaakmat(wit, g.getBlackKillPositions())){
+                message("Wit heeft gewonnen!");
+            } else if(g.schaakmat(zwart, g.getWhiteKillPositions())){
+                message("Zwart heeft gewonnen");
+            }
+            //stalemate
+            if(g.pat(wit, g.getBlackKillPositions())){
+                message("Pat voor wit");
+            } else if(g.pat(zwart, g.getWhiteKillPositions())){
+                message("Pat voor zwart");
+            }
             //check
             if(g.schaak(wit, g.getBlackKillPositions())){
                 message("Schaak wit!");
             } else if(g.schaak(zwart, g.getWhiteKillPositions())){
                 message("Schaak zwart!");
-            }
-
-            // set threat
-            if(SchaakGUI::displayThreats()){
-                for(auto v : g.getWhiteKillPositions()){
-                    setPieceThreat(v.first, v.second, true);
-                }
-                for(auto l : g.getBlackKillPositions()){
-                    setPieceThreat(l.first, l.second, true);
-                }
             }
             secondClick = false;
             return;
@@ -183,6 +234,21 @@ void SchaakGUI::redo() {}
 void SchaakGUI::visualizationChange() {
     QString visstring = QString(displayMoves()?"T":"F")+(displayKills()?"T":"F")+(displayThreats()?"T":"F");
     message(QString("Visualization changed : ")+visstring);
+    if(!displayMoves()){
+        dMoves = false;
+    } else{
+        dMoves = true;
+    }
+    if(!displayKills()){
+        dKills = false;
+    } else{
+        dKills = true;
+    }
+    if(!displayThreats()){
+        dThreats = false;
+    } else{
+        dThreats = true;
+    }
 }
 
 
@@ -194,9 +260,11 @@ void SchaakGUI::update() {
         for(int j = 0; j < 8;j++){
             if(g.schaakboord[i][j] != nullptr){
                 setItem(i,j, g.schaakboord[i][j]);
+                g.schaakboord[i][j]->setEigenGeldigeZetten(g.schaakboord[i][j]->geldige_zetten(g));
             }
         }
     }
+    g.update_geldige_zetten();
 }
 
 /*
@@ -205,7 +273,6 @@ void SchaakGUI::update() {
  * die gebruikt wordt om te kijken waar witte speler zwarte speler kan killen
  * * */
 void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
-    geldigForWhite();
     whiteKillPositions2.clear();
     //alle plekken waar wit kan killen in whiteKillPosition steken
     for(int i = 0; i < 8; i++){
@@ -222,20 +289,19 @@ void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
                             }
                         }
                         if(!found){
-                            whiteKillPositions2.push_back(make_pair(b.first, b.second));
+                            // kijk ofdat na een kill een schaak is indien wel dan gaat voegt gij deze move niet in de vector
+                            bool found2 = false;
+                            for(auto move : g.schaakboord[i][j]->getEigenGeldigeZetten()){
+                                if(b.first == move.first && b.second == move.second){
+                                    found2 = true;
+                                    break;
+                                }
+                            }
+                            if(found2){
+                                whiteKillPositions2.push_back(make_pair(b.first, b.second));
+                            }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    // reset danger_posities
-    for(int i = 0; i < 8; i++){
-        for(int j = 0; j < 8; j++){
-            if(g.schaakboord[i][j] != nullptr){
-                if(g.schaakboord[i][j]->getKleur() == wit && g.schaakboord[i][j]->danger_posities.size() > 0){
-                    g.schaakboord[i][j]->danger_posities.clear();
                 }
             }
         }
@@ -247,9 +313,8 @@ void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
  * Zelfde als functie hierboven maar voor zwarte speler
  * * */
 void SchaakGUI::updateBlack(vector<pair<int,int>> &blackKillPositions2){
-    geldigForBlack();
     blackKillPositions2.clear();
-    //alle plekken waar wit kan killen in whiteKillPosition steken
+    //alle plekken waar zwart kan killen in blackKillPositions steken
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
             //blackKillPositions
@@ -264,61 +329,59 @@ void SchaakGUI::updateBlack(vector<pair<int,int>> &blackKillPositions2){
                             }
                         }
                         if(!found){
-                            blackKillPositions2.push_back(make_pair(b.first, b.second));
+                            // kijk ofdat na een kill een schaak is indien wel dan gaat voegt gij deze move niet in de vector
+                            bool found2 = false;
+                            for(auto move : g.schaakboord[i][j]->getEigenGeldigeZetten()){
+                                if(b.first == move.first && b.second == move.second){
+                                    found2 = true;
+                                    break;
+                                }
+                            }
+                            if(found2){
+                                blackKillPositions2.push_back(make_pair(b.first, b.second));
+                            }
                         }
                     }
                 }
             }
         }
     }
-    // reset danger_posities
-    for(int i = 0; i < 8; i++){
-        for(int j = 0; j < 8; j++){
-            if(g.schaakboord[i][j] != nullptr){
-                if(g.schaakboord[i][j]->getKleur() == zwart && g.schaakboord[i][j]->danger_posities.size() > 0){
-                    g.schaakboord[i][j]->danger_posities.clear();
-                }
-            }
+}
+
+void SchaakGUI::color_red(SchaakStuk* s) {
+    /*
+     * 1) loop through all legal possible moves and then make a move
+     * 2) check if the Schaakstuk is in danger
+     * 3) if 2) == true then color the red square
+     * 4) go back to previous move
+     * 5) repeat until you've looped through all legal possible moves
+     * */
+    if(s == nullptr){
+        return;
+    }
+    int primaryRij = s->rij;
+    int primaryKolom = s->kolom;
+    //1)
+    for(auto i : s->getEigenGeldigeZetten()){
+        SchaakStuk* temp = nullptr; // use for storing killed schaakstuk
+        if(g.schaakboord[i.first][i.second] != nullptr){
+            temp = g.schaakboord[i.first][i.second];
+        }
+        g.move(s, i.first, i.second);
+        //2)
+        if(g.schaak_danger(i.first, i.second)){
+            //3)
+            setTileThreat(i.first, i.second, true);
+        }
+        //4)
+        g.setPiece(primaryRij, primaryKolom, s);
+        g.schaakboord[i.first][i.second] = nullptr;
+        //fix if a SchaakStuk has been killed
+        if(temp != nullptr){
+            g.setPiece(i.first, i.second, temp);
         }
     }
 }
 
 
-void SchaakGUI::geldigForWhite(){
-    vector<pair<int,int>> rr;
-    for(int i = 0; i < 8; i++){
-        for(int j = 0; j < 8; j++){
-            if(g.schaakboord[i][j] != nullptr){
-                if(g.schaakboord[i][j]->getKleur() == wit){
-                    rr = g.schaakboord[i][j]->geldige_zetten(g);
-                }
-            }
-        }
-    }
-}
-
-void SchaakGUI::geldigForBlack(){
-    vector<pair<int,int>> rr;
-    for(int i = 0; i < 8; i++){
-        for(int j = 0; j < 8; j++){
-            if(g.schaakboord[i][j] != nullptr){
-                if(g.schaakboord[i][j]->getKleur() == zwart){
-                    rr = g.schaakboord[i][j]->geldige_zetten(g);
-                }
-            }
-        }
-    }
-}
-
-void SchaakGUI::printGeldig(vector<pair<int, int>> killPositions) {
-
-    if(killPositions.size() > 0){
-        cout << "POSITIES DIE BLACK KAN KILLEN: " << endl;
-        for(auto i :killPositions){
-            cout << i.first << ", " << i.second << endl;
-        }
-    } else{
-        cout << "BLACK kan niemand killen " << endl;
-    }
-}
 
