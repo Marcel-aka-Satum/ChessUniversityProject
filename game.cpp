@@ -128,12 +128,36 @@ bool Game::schaak(zw kleur, vector<pair<int,int>> &killPositions) {
 // Geeft true als kleur schaakmat staat
 bool Game::schaakmat(zw kleur, vector<pair<int,int>> &killPositions) {
     if(kleur == wit){
-        if(schaak(wit, killPositions) && schaakboord[rijWhiteKing][kolomWhiteKing]->getEigenGeldigeZetten().size() == 0){
-            return true;
+        if(schaak(wit, killPositions)){
+            int aantalZetten = 0;
+            for(int i = 0; i < 8; i++){
+                for(int j = 0; j < 8; j++){
+                    if(schaakboord[i][j] != nullptr){
+                        if(schaakboord[i][j]->getKleur() == wit){
+                            aantalZetten += schaakboord[i][j]->getEigenGeldigeZetten().size();
+                        }
+                    }
+                }
+            }
+            if(aantalZetten == 0){
+                return true;
+            }
         }
     } else if(kleur == zwart){
-        if(schaak(zwart, killPositions) && schaakboord[rijBlackKing][kolomBlackKing]->getEigenGeldigeZetten().size() == 0){
-            return true;
+        if(schaak(zwart, killPositions)){
+            int aantalZetten = 0;
+            for(int i = 0; i < 8; i++){
+                for(int j = 0; j < 8; j++){
+                    if(schaakboord[i][j] != nullptr){
+                        if(schaakboord[i][j]->getKleur() == zwart){
+                            aantalZetten += schaakboord[i][j]->getEigenGeldigeZetten().size();
+                        }
+                    }
+                }
+            }
+            if(aantalZetten == 0){
+                return true;
+            }
         }
     }
     return false;

@@ -27,37 +27,47 @@ vector<pair<int,int>> Pion::geldige_zetten(Game& g){
     danger_posities.clear();
 
     if(g.schaakboord[rij][kolom]->getKleur() == zwart){ // check black
-        if(g.schaakboord[rij+1][kolom+1] != nullptr && g.schaakboord[rij+1][kolom+1]->getKleur() == wit && g.schaakboord[rij][kolom]->kolom < 7 && rij+1 >= 0 && rij+1 <= 7) {
-            zetten.push_back(make_pair(rij + 1, kolom + 1)); // kill schijn rechts indien niet op kolom 7
-            danger_posities.push_back(make_pair(rij+1, kolom+1)); //DEZE POSITIE KAN GEKILLED WORDEN
+        if(g.schaakboord[rij+1][kolom+1] != nullptr  && g.schaakboord[rij][kolom]->kolom < 7 && rij+1 >= 0 && rij+1 <= 7){
+            if(g.schaakboord[rij+1][kolom+1]->getKleur() == wit) {
+                zetten.push_back(make_pair(rij + 1, kolom + 1)); // kill schijn rechts indien niet op kolom 7
+                danger_posities.push_back(make_pair(rij+1, kolom+1)); //DEZE POSITIE KAN GEKILLED WORDEN
+            }
         }
-        if(g.schaakboord[rij+1][kolom-1] != nullptr && g.schaakboord[rij+1][kolom-1]->getKleur() == wit && g.schaakboord[rij][kolom]->kolom > 0 && rij+1 >= 0 && rij +1 <= 7){
-            zetten.push_back(make_pair(rij+1,kolom-1)); // kill schijn links indien niet op kolom 0
-            danger_posities.push_back(make_pair(rij+1, kolom-1)); //DEZE POSITIE KAN GEKILLED WORDEN
+        if(g.schaakboord[rij+1][kolom-1] != nullptr && g.schaakboord[rij][kolom]->kolom > 0 && rij+1 >= 0 && rij +1 <= 7){
+            if(g.schaakboord[rij+1][kolom-1]->getKleur() == wit){
+                zetten.push_back(make_pair(rij+1,kolom-1)); // kill schijn links indien niet op kolom 0
+                danger_posities.push_back(make_pair(rij+1, kolom-1)); //DEZE POSITIE KAN GEKILLED WORDEN
+            }
         }
-        if(g.schaakboord[rij+1][kolom] == nullptr){
+        if(g.schaakboord[rij+1][kolom] == nullptr && rij+1 >= 0 && rij +1 <= 7){
             zetten.push_back(make_pair(rij+1, kolom));
         } else{
             return zetten;
         }
-        if(g.schaakboord[rij+2][kolom] == nullptr && g.schaakboord[rij][kolom]->rij == 1){
-            zetten.push_back(make_pair(rij+2, kolom));
+        if(g.schaakboord[rij+2][kolom] == nullptr && rij+2 >= 0 && rij +2 <= 7){
+            if(g.schaakboord[rij][kolom]->rij == 1){
+                zetten.push_back(make_pair(rij+2, kolom));
+            }
         }
     } else if(g.schaakboord[rij][kolom]->getKleur() == wit){ // check white
-        if(g.schaakboord[rij-1][kolom+1] != nullptr && g.schaakboord[rij-1][kolom+1]->getKleur() == zwart && g.schaakboord[rij][kolom]->kolom < 7 && rij-1 >= 0 && rij-1 <= 7) {
-            zetten.push_back(make_pair(rij-1, kolom + 1)); // kill schijn rechts idien kolom < 7
-            danger_posities.push_back(make_pair(rij-1, kolom+1)); //DEZE POSITIE KAN GEKILLED WORDEN
+        if(g.schaakboord[rij-1][kolom+1] != nullptr && g.schaakboord[rij][kolom]->kolom < 7 && rij-1 >= 0 && rij-1 <= 7){
+            if(g.schaakboord[rij-1][kolom+1]->getKleur() == zwart) {
+                zetten.push_back(make_pair(rij-1, kolom + 1)); // kill schijn rechts idien kolom < 7
+                danger_posities.push_back(make_pair(rij-1, kolom+1)); //DEZE POSITIE KAN GEKILLED WORDEN
+            }
         }
-        if(g.schaakboord[rij-1][kolom-1] != nullptr && g.schaakboord[rij-1][kolom-1]->getKleur() == zwart && g.schaakboord[rij][kolom]->kolom > 0 && rij-1 >= 0 && rij-1 <= 7) {
-            zetten.push_back(make_pair(rij-1, kolom - 1)); // kill schijn links idien kolom > 0
-            danger_posities.push_back(make_pair(rij-1, kolom-1)); //DEZE POSITIE KAN GEKILLED WORDEN
+        if(g.schaakboord[rij-1][kolom-1] != nullptr && kolom-1 >= 0 && rij-1 >= 0 && rij-1 <= 7){
+            if(g.schaakboord[rij-1][kolom-1]->getKleur() == zwart){
+                zetten.push_back(make_pair(rij-1, kolom - 1)); // kill schijn links idien kolom > 0
+                danger_posities.push_back(make_pair(rij-1, kolom-1)); //DEZE POSITIE KAN GEKILLED WORDEN
+            }
         }
-        if(g.schaakboord[rij-1][kolom] == nullptr){
+        if(g.schaakboord[rij-1][kolom] == nullptr && rij-1 >= 0 && rij-1 <= 7){
             zetten.push_back(make_pair(rij-1, kolom));
         } else{
             return zetten;
         }
-        if(g.schaakboord[rij-2][kolom] == nullptr && g.schaakboord[rij][kolom]->rij == 6){
+        if(g.schaakboord[rij-2][kolom] == nullptr && rij-2 >= 0 && rij-2 <= 7 && rij == 6){
             zetten.push_back(make_pair(rij-2, kolom));
         }
     }

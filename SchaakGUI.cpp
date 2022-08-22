@@ -148,15 +148,15 @@ void SchaakGUI::clicked(int r, int k) {
             }
             //check mate
             if(g.schaakmat(wit, g.getBlackKillPositions())){
-                message("Wit heeft gewonnen!");
+                message("Check mate");
             } else if(g.schaakmat(zwart, g.getWhiteKillPositions())){
-                message("Zwart heeft gewonnen");
+                message("Check mate");
             }
             //stalemate
             if(g.pat(wit, g.getBlackKillPositions())){
-                message("Pat voor wit");
+                message("Pat");
             } else if(g.pat(zwart, g.getWhiteKillPositions())){
-                message("Pat voor zwart");
+                message("Pat");
             }
             //check
             if(g.schaak(wit, g.getBlackKillPositions())){
@@ -278,8 +278,8 @@ void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
             //whitekillposition
-            if(g.schaakboord[i][j] != nullptr && g.schaakboord[i][j]->getKleur() == wit){
-                if(g.schaakboord[i][j]->danger_posities.size() > 0){
+            if(g.schaakboord[i][j] != nullptr && g.schaakboord[i][j]->danger_posities.size() > 0){
+                if(g.schaakboord[i][j]->getKleur() == wit){
                     for(auto b : g.schaakboord[i][j]->danger_posities){
                         bool found = false; // check if there is already same pair
                         for(auto h : whiteKillPositions2){
@@ -289,17 +289,7 @@ void SchaakGUI::updateWhite(vector<pair<int,int>> &whiteKillPositions2){
                             }
                         }
                         if(!found){
-                            // kijk ofdat na een kill een schaak is indien wel dan gaat voegt gij deze move niet in de vector
-                            bool found2 = false;
-                            for(auto move : g.schaakboord[i][j]->getEigenGeldigeZetten()){
-                                if(b.first == move.first && b.second == move.second){
-                                    found2 = true;
-                                    break;
-                                }
-                            }
-                            if(found2){
-                                whiteKillPositions2.push_back(make_pair(b.first, b.second));
-                            }
+                            whiteKillPositions2.push_back(make_pair(b.first, b.second));
                         }
                     }
                 }
@@ -329,17 +319,7 @@ void SchaakGUI::updateBlack(vector<pair<int,int>> &blackKillPositions2){
                             }
                         }
                         if(!found){
-                            // kijk ofdat na een kill een schaak is indien wel dan gaat voegt gij deze move niet in de vector
-                            bool found2 = false;
-                            for(auto move : g.schaakboord[i][j]->getEigenGeldigeZetten()){
-                                if(b.first == move.first && b.second == move.second){
-                                    found2 = true;
-                                    break;
-                                }
-                            }
-                            if(found2){
-                                blackKillPositions2.push_back(make_pair(b.first, b.second));
-                            }
+                            blackKillPositions2.push_back(make_pair(b.first, b.second));
                         }
                     }
                 }
